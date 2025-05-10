@@ -4,7 +4,7 @@ function Square({ space, buttonClick, myID, done }) {
   if (!done)
     return (<button className="square" onClick={() => buttonClick(myID)}>{space[myID]}</button>);
   else
-  return (<button style={{backgroundColor:"blue", color: "red"}} className="square" onClick={() => buttonClick(myID)}>{space[myID]}</button>);
+    return (<button style={{ backgroundColor: "blue", color: "red" }} className="square" onClick={() => buttonClick(myID)}>{space[myID]}</button>);
 }
 
 function isComplete(spaces) {
@@ -26,43 +26,90 @@ function isComplete(spaces) {
   return (myChar != null) && (spaces[0] == spaces[8] && spaces[0] == myChar || spaces[2] == spaces[6] && spaces[2] == myChar);
 }
 
-export default function Board() {
-  const [isX, setIsX] = useState(true);
-  const [spaces, setSpaces] = useState(Array(9).fill(null));
+function Board({ isX, spaces, handleClick }) {
   const [complete, setComplete] = useState(false);
 
   function buttonClick(myID) {
     if (spaces[myID] != null)
-        return;
+      return;
     const spaceCopy = spaces.slice();
     if (isX)
       spaceCopy[myID] = 'X';
-    else 
+    else
       spaceCopy[myID] = 'O';
-    setIsX(!isX);
-    setSpaces(spaceCopy);
     setComplete(isComplete(spaceCopy));
+    handleClick(spaceCopy);
+    console.log("poopdsadsa");
   }
 
   return (
     <>
       <div className="board-row">
-        <Square done = {complete} myID={0} space={spaces} buttonClick={buttonClick} />
-        <Square done = {complete} myID={1} space={spaces} buttonClick={buttonClick} />
-        <Square done = {complete} myID={2} space={spaces} buttonClick={buttonClick} />
+        <Square done={complete} myID={0} space={spaces} buttonClick={buttonClick} />
+        <Square done={complete} myID={1} space={spaces} buttonClick={buttonClick} />
+        <Square done={complete} myID={2} space={spaces} buttonClick={buttonClick} />
       </div>
 
       <div className="board-row">
-        <Square done = {complete} myID={3} space={spaces} buttonClick={buttonClick} />
-        <Square done = {complete} myID={4} space={spaces} buttonClick={buttonClick} />
-        <Square done = {complete} myID={5} space={spaces} buttonClick={buttonClick} />
+        <Square done={complete} myID={3} space={spaces} buttonClick={buttonClick} />
+        <Square done={complete} myID={4} space={spaces} buttonClick={buttonClick} />
+        <Square done={complete} myID={5} space={spaces} buttonClick={buttonClick} />
       </div>
 
       <div className="board-row">
-        <Square done = {complete} myID={6} space={spaces} buttonClick={buttonClick} />
-        <Square done = {complete} myID={7} space={spaces} buttonClick={buttonClick} />
-        <Square done = {complete} myID={8} space={spaces} buttonClick={buttonClick} />
+        <Square done={complete} myID={6} space={spaces} buttonClick={buttonClick} />
+        <Square done={complete} myID={7} space={spaces} buttonClick={buttonClick} />
+        <Square done={complete} myID={8} space={spaces} buttonClick={buttonClick} />
       </div>
     </>
   )
 }
+
+export default function Game() {
+  const [history, setHistory] = useState([Array(9).fill(null)]);
+  const [currentMove, setCurrentMove] = useState(0);
+  const [isX, setIsX] = useState(true);
+
+  function handleClick(spaces) {
+    let historyCopy = (history.slice(0, currentMove + 1));
+    historyCopy.push(spaces);
+    setHistory(historyCopy);
+    console.log(historyCopy);
+    console.log("poop");
+    setCurrentMove(currentMove + 1);
+    setIsX(!isX);
+  }
+
+  function jumpTo(nextMove) {
+    setCurrentMove(nextMove);
+    setIsX(nextMove % 2 == 0);
+  }
+
+  const moves = history.map((squares, move) => {
+    let description = "";
+    if (move > 0)
+      description = "Go to move #" + move;
+    else
+      description = "Go to game start";
+    return (
+      <li key={move}>
+        <button onClick={() => jumpTo(move)}>{description}</button>
+      </li>
+    )
+  });
+
+  return (
+    <>
+      <div className="game">
+        <div>
+          <Board isX={isX} spaces={history[currentMove]} handleClick={(spaced) => handleClick(spaced)} />
+        </div>
+        <div className="game-info">
+          <ol>{moves}</ol>
+        </div>
+      </div>
+
+    </>
+  )
+}
+
